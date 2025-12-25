@@ -1,8 +1,10 @@
 [phases.setup]
 nixPkgs = ['nodejs-18_x']
+# Change 'npm ci' to 'npm install' to allow auto-syncing
+cmds = ['npm install']
 
 [phases.build]
-cmds = ['npm install', 'npm run build']
+cmds = ['npm run build']
 
 [start]
 cmd = 'npm start'

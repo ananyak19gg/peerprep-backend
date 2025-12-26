@@ -13,9 +13,17 @@ app.use(express.json());
 // --------------------
 // Firebase Init
 // --------------------
+
+import serviceAccount from "../serviceAccountKey.json";
+
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp({
+    credential: admin.credential.cert(
+      serviceAccount as admin.ServiceAccount
+    ),
+  });
 }
+
 
 const db = admin.firestore();
 

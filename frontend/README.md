@@ -1,4 +1,4 @@
-# PeerPrep — Frontend
+# Campus Connect — Frontend
 
 Local setup
 

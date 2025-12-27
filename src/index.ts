@@ -1,34 +1,34 @@
 import "dotenv/config";
 import express from "express";
-import * as admin from "firebase-admin";
+import cors from "cors";
+import admin from "firebase-admin";
 import cron from "node-cron";
+
 import { recalculatePanicLevels } from "./panicRecalculator";
 import { sendDailyNotifications } from "./notifications";
 import { loungeTLDR } from "./routes/loungeTLDR";
 
-// --------------------
-// App Setup
-// --------------------
 const app = express();
+
+/* =======================
+   CORS — FINAL & SAFE
+   ======================= */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://campusconnectivity.netlify.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
 app.use(express.json());
 
-// --------------------
-// Firebase Init (Environment Aware)
-// --------------------
-let serviceAccount: any;
-
-try {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    // For Railway: Use the Environment Variable
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    // For Local: Use the physical file
-    // We use require instead of import to prevent tsc from crashing during build
-    serviceAccount = require("../serviceAccountKey.json");
-  }
-} catch (error) {
-  console.warn("⚠️ Firebase service account not found. Ensure FIREBASE_SERVICE_ACCOUNT is set in Railway variables.");
-}
+/* =======================
+   Firebase Init
+   ======================= */
+import serviceAccount from "../serviceAccountKey.json";
 
 if (!admin.apps.length && serviceAccount) {
   admin.initializeApp({
@@ -38,20 +38,27 @@ if (!admin.apps.length && serviceAccount) {
 
 const db = admin.firestore();
 
-// --------------------
-// CRON: Daily Panic + Notifications
-// --------------------
+/* =======================
+   CRON JOBS
+   ======================= */
 cron.schedule("0 0 * * *", async () => {
-  console.log("🕒 [CampusConnect] Running daily audit...");
+  console.log("🕒 Daily audit running...");
   await recalculatePanicLevels();
   await sendDailyNotifications();
 });
 
-// --------------------
-// API: Create Post
-// --------------------
+/* =======================
+   POSTS API
+   ======================= */
 app.post("/api/posts", async (req, res) => {
   try {
+    const { communityId, title, description } = req.body;
+
+    if (!communityId || !title || !description) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing fields",
+      });
     const { communityId, type, title, description, date, deadline } = req.body;
 
     if (!communityId || !type || !title || !description) {
@@ -63,14 +70,18 @@ app.post("/api/posts", async (req, res) => {
       .doc(communityId)
       .collection("posts")
       .add({
-        type,
         title,
         description,
-        date: date || null,
-        deadline: deadline || null,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
+    res.json({
+      success: true,
+      postId: postRef.id,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
     res.status(201).json({ success: true, postId: postRef.id, message: "Post created successfully" });
   } catch (error) {
     console.error("❌ Error creating post:", error);
@@ -78,13 +89,11 @@ app.post("/api/posts", async (req, res) => {
   }
 });
 
-// --------------------
-// API: Get Posts by Community
-// --------------------
 app.get("/api/posts", async (req, res) => {
   try {
     const { communityId } = req.query;
     if (!communityId) {
+      return res.status(400).json({ success: false });
       return res.status(400).json({ success: false, error: "communityId is required" });
     }
 
@@ -95,29 +104,38 @@ app.get("/api/posts", async (req, res) => {
       .orderBy("createdAt", "desc")
       .get();
 
-    const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const posts = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
     res.json({ success: true, posts });
-  } catch (error) {
-    console.error("❌ Error fetching posts:", error);
-    res.status(500).json({ success: false, error: "Internal server error" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 });
 
-// --------------------
-// Global Lounge: Send Message
-// --------------------
+/* =======================
+   GLOBAL LOUNGE
+   ======================= */
 app.post("/api/lounge/message", async (req, res) => {
   try {
     const { text } = req.body;
     if (!text) {
+      return res.status(400).json({ success: false });
       return res.status(400).json({ success: false, error: "Message text required" });
     }
 
     await db.collection("globalLounge").add({
       text,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
     res.status(201).json({ success: true, message: "Message sent" });
   } catch (error) {
     console.error("❌ Lounge error:", error);
@@ -125,9 +143,6 @@ app.post("/api/lounge/message", async (req, res) => {
   }
 });
 
-// --------------------
-// Global Lounge: Get Messages
-// --------------------
 app.get("/api/lounge/messages", async (_req, res) => {
   try {
     const snapshot = await db
@@ -136,6 +151,21 @@ app.get("/api/lounge/messages", async (_req, res) => {
       .limit(50)
       .get();
 
+    const messages = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.json({ success: true, messages });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+/* =======================
+   HEALTH CHECK
+   ======================= */
     const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json({ success: true, messages });
   } catch (error) {
@@ -153,13 +183,13 @@ app.get("/api/lounge/tldr", loungeTLDR);
 // Health Check
 // --------------------
 app.get("/", (_req, res) => {
-  res.send("🚀 CampusConnect Backend is Live and Healthy!");
+  res.send("🚀 CampusConnect Backend Live");
 });
 
-// --------------------
-// Server Start (Railway compatible)
-// --------------------
+/* =======================
+   START SERVER
+   ======================= */
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`📡 [CampusConnect] Server running on port ${PORT}`);
+  console.log(`📡 Server running on ${PORT}`);
 });

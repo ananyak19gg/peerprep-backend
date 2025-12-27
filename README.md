@@ -8,13 +8,15 @@ Instead of adding pressure, CampusConnect reduces cognitive overload.
 <h2>🎯 Problem Statement</h2>
 
 College students often face avoidable stress because:
-📢 Important announcements are scattered across chats and platforms
-⏳ Deadlines are mentioned casually and forgotten easily.
-😵 Students return after breaks feeling lost in conversations
-🔔 Existing systems overwhelm rather than guide
+* 📢 Important announcements are scattered across chats and platforms
+* ⏳ Deadlines are mentioned casually and forgotten easily.
+* 😵 Students return after breaks feeling lost in conversations
+* 🔔 Existing systems overwhelm rather than guide
 
 Most platforms focus on activity.
 CampusConnect focuses on clarity.
+
+--
 
 <h2>🛠️ Our Approach</h2>
 
@@ -26,73 +28,83 @@ CampusConnect works by:
 - Keeping the system calm — no forced help, no pressure loops
 The aim is support without stress.
 
+--
+
 <h3>🌟 Core Features</h3>
 
-📝 Post → Task conversion
-🚦 Panic Levels (🟢 Calm / 🟡 Alert / 🔴 Urgent)
-🔔 Deadline-based smart notifications
-🧠 AI-powered Global Lounge TL;DR
-🌍 Global Lounge for casual campus interaction
-⏱️ Optional focus timers
-🧘 Stress-aware UX philosophy
+* 📝 Post → Task conversion
+* 🚦 Panic Levels (🟢 Calm / 🟡 Alert / 🔴 Urgent)
+* 🔔 Deadline-based smart notifications
+* 🧠 AI-powered Global Lounge TL;DR
+* 🌍 Global Lounge for casual campus interaction
+* ⏱️ Optional focus timers
+* 🧘 Stress-aware UX philosophy
+
+--
 
 <h3>🧰 Tech Stack</h3>
 
 Frontend
--React / Next.js
--Tailwind CSS
--Firebase Authentication
+- React / Next.js
+- Tailwind CSS
+- Firebase Authentication
 
 Backend
--Node.js + Express
--Firebase Admin SDK
--Cron-based background jobs
+- Node.js + Express
+- Firebase Admin SDK
+- Cron-based background jobs
 
 AI & Cloud
--Google Gemini API
--Google Cloud Platform
+- Google Gemini API
+- Google Cloud Platform
 
 Database
--Cloud Firestore
--Structured collections & rules
+- Cloud Firestore
+- Structured collections & rules
+
+--
 
 <h3>🔀 System Flow</h3>
 
-1.Campus post is created
-2.Post content is analyzed
-3.Tasks are generated (if deadlines exist)
-4.Panic levels update as deadlines approach
-5.Notifications are sent based on urgency
-6.Lounge messages accumulate
-7.AI generates a TL;DR when a student returns
+1. Campus post is created
+2. Post content is analyzed
+3. Tasks are generated (if deadlines exist)
+4. Panic levels update as deadlines approach
+5. Notifications are sent based on urgency
+6. Lounge messages accumulate
+7. AI generates a TL;DR when a student returns
+
+--
 
 <h2>👥 Team Members & Contributions</h2>
 
 <h3>Ananya Dubey (Backend Developer & AI Integrator)</h3>
-Designed the complete backend architecture
-Implemented all APIs for posts, tasks, notifications, and lounge features
-Integrated Google Gemini AI for:
-Post → Task understanding
-Global Lounge TL;DR generation
-Managed Firestore schema, cron jobs, and environment configuration
+* Designed the complete backend architecture
+* Implemented all APIs for posts, tasks, notifications, and lounge features
+* Integrated Google Gemini AI for:
+* Post → Task understanding
+* Global Lounge TL;DR generation
+* Managed Firestore schema, cron jobs, and environment configuration
 
 <h3>Shreya Singh (Documentation & Authentication Lead)</h3>
-Authored complete project documentation and system explanation
-Implemented authentication flow using Firebase Auth
-Defined access logic and user flow documentation
-Ensured clarity and consistency for submission and evaluation
+* Authored complete project documentation and system explanation
+* Implemented authentication flow using Firebase Auth
+* Defined access logic and user flow documentation
+* Ensured clarity and consistency for submission and evaluation
 
 <h3>Rishita Chouksey (Connectivity & Integration Lead)</h3>
-Established frontend–backend connectivity
-Integrated APIs with frontend components
-Ensured smooth data flow across posts, lounge, and tasks
-Led the overall pitch narrative and feature walkthrough
+* Established frontend–backend connectivity
+* Integrated APIs with frontend components
+* Ensured smooth data flow across posts, lounge, and tasks
+* Led the overall pitch narrative and feature walkthrough
 
 <h3>Shreya Deolia (Frontend Developer & UI/UX Designer)</h3>
-Designed the user interface and interaction flow
-Implemented frontend layouts and components
-Focused on clean, calm, and accessible UX
-Ensured design aligned with stress-aware principles
+* Designed the user interface and interaction flow
+* Implemented frontend layouts and components
+* Focused on clean, calm, and accessible UX
+* Ensured design aligned with stress-aware principles
+--
+
 <h2> ⚙️ Project Setup (Backend) </h2>
 1️⃣ Clone the Repository
 git clone <backend-repo-url>

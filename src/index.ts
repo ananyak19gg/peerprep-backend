@@ -1,8 +1,11 @@
+import "dotenv/config";
 import express from "express";
 import * as admin from "firebase-admin";
 import cron from "node-cron";
+export { postToTask } from "./triggers/postToTask";
 import { recalculatePanicLevels } from "./panicRecalculator";
 import { sendDailyNotifications } from "./notifications";
+import { loungeTLDR } from "./routes/loungeTLDR";
 
 // --------------------
 // App Setup
@@ -11,7 +14,7 @@ const app = express();
 app.use(express.json());
 
 // --------------------
-// Firebase Init
+// Firebase Init (ONLY ONCE)
 // --------------------
 
 import serviceAccount from "../serviceAccountKey.json";
@@ -183,6 +186,11 @@ app.get("/api/lounge/messages", async (_req, res) => {
     });
   }
 });
+
+// --------------------
+// Global Lounge: TL;DR Summary (Gemini)
+// --------------------
+app.get("/api/lounge/tldr", loungeTLDR);
 
 // --------------------
 // Health Check

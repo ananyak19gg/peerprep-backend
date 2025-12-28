@@ -7,7 +7,12 @@ Instead of adding pressure, CampusConnect reduces cognitive overload.
 
 ---
 ## Live Demo
-click: https://campusconnectivity.netlify.app
+
+⚠️ Note:
+- Frontend deployment i.e. the below link was live at submission time.
+- Due to Netlify free-tier credit limits, the deployment was auto-paused after submission.
+- Complete working code and backend (Railway) are available in this repository.
+- Click: https://campusconnectivity.netlify.app
 ---
 
 <h2>🎯 Problem Statement</h2>

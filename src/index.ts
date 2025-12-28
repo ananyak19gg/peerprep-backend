@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-dotenv.config(); 
+dotenv.config();
 
 import express from "express";
 import * as admin from "firebase-admin";
@@ -45,7 +45,7 @@ cron.schedule("0 0 * * *", async () => {
 app.post("/api/posts", async (req, res) => {
   try {
     const { communityId, type, title, description, userId } = req.body;
-    
+
     const postRef = await db.collection("communities").doc(communityId).collection("posts").add({
       type, title, description, userId,
       createdAt: admin.firestore.FieldValue.serverTimestamp()

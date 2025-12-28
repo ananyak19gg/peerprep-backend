@@ -1,65 +1,91 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL;
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Lounge() {
-    const [messages, setMessages] = useState([]);
-    const [text, setText] = useState("");
+    const [posts, setPosts] = useState([]);
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(true);
 
-    const fetchMessages = async () => {
+    const fetchPosts = async () => {
         try {
-            const res = await fetch(`${BACKEND}/api/lounge/messages`);
+            const res = await fetch(`${API}/api/posts?communityId=general`);
             const data = await res.json();
-            if (data.success) setMessages(data.messages);
-            setLoading(false);
+            if (data.success) setPosts(data.posts);
         } catch (err) {
-            console.error("Fetch lounge failed", err);
+            console.error(err);
+        } finally {
+            setLoading(false);
         }
     };
 
-    const sendMessage = async () => {
-        if (!text.trim()) return;
+    const createPost = async () => {
+        if (!title || !description) return;
 
-        await fetch(`${BACKEND}/api/lounge/message`, {
+        await fetch(`${API}/api/posts`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({
+                communityId: "general",
+                type: "text",
+                title,
+                description,
+            }),
         });
 
-        setText("");
-        fetchMessages(); // instant refresh
+        setTitle("");
+        setDescription("");
+        fetchPosts();
     };
 
     useEffect(() => {
-        fetchMessages();
-        const interval = setInterval(fetchMessages, 5000); // ⏱ realtime feel
-        return () => clearInterval(interval);
+        fetchPosts();
     }, []);
 
     return (
-        <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-            <h1>🌍 Global Lounge</h1>
+        <div className="min-h-screen bg-bg p-6">
+            <div className="max-w-3xl mx-auto">
+                <h1 className="text-3xl font-bold text-primary mb-6">
+                    🌍 CampusConnect – Global Lounge
+                </h1>
 
-            <div style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem" }}>
-                <input
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Say something..."
-                    style={{ width: "80%" }}
-                />
-                <button onClick={sendMessage} style={{ marginLeft: "1rem" }}>
-                    Send
-                </button>
-            </div>
-
-            {loading && <p>Loading messages...</p>}
-
-            {messages.map((msg) => (
-                <div key={msg.id} style={{ padding: "0.5rem 0" }}>
-                    💬 {msg.text}
+                {/* Create Post */}
+                <div className="bg-card shadow-soft rounded-xl p-4 mb-6">
+                    <input
+                        className="w-full border p-2 rounded mb-2"
+                        placeholder="Post title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                    <textarea
+                        className="w-full border p-2 rounded mb-2"
+                        placeholder="What's happening on campus?"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                    />
+                    <button
+                        onClick={createPost}
+                        className="bg-primary text-white px-4 py-2 rounded hover:opacity-90"
+                    >
+                        Post
+                    </button>
                 </div>
-            ))}
+
+                {/* Feed */}
+                {loading && <p>Loading feed…</p>}
+
+                {posts.map((post) => (
+                    <div
+                        key={post.id}
+                        className="bg-card shadow-soft rounded-xl p-4 mb-4"
+                    >
+                        <h3 className="font-semibold text-lg">{post.title}</h3>
+                        <p className="text-muted mt-1">{post.description}</p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

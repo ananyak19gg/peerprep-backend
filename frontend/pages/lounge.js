@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -6,11 +7,18 @@ export default function Lounge() {
     const [posts, setPosts] = useState([]);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [loading, setLoading] = useState(true);
 
     const fetchPosts = async () => {
-        const res = await fetch(`${API}/api/posts?communityId=general`);
-        const data = await res.json();
-        if (data.success) setPosts(data.posts);
+        try {
+            const res = await fetch(`${API}/api/posts?communityId=general`);
+            const data = await res.json();
+            if (data.success) setPosts(data.posts);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const createPost = async () => {
@@ -23,8 +31,8 @@ export default function Lounge() {
                 communityId: "general",
                 type: "text",
                 title,
-                description
-            })
+                description,
+            }),
         });
 
         setTitle("");
@@ -40,36 +48,40 @@ export default function Lounge() {
         <div className="min-h-screen bg-bg p-6">
             <div className="max-w-3xl mx-auto">
                 <h1 className="text-3xl font-bold text-primary mb-6">
-                    🌍 Global Lounge
+                    🌍 CampusConnect – Global Lounge
                 </h1>
 
-                <div className="bg-card p-4 rounded-xl shadow mb-6">
+                {/* Create Post */}
+                <div className="bg-card shadow-soft rounded-xl p-4 mb-6">
                     <input
                         className="w-full border p-2 rounded mb-2"
                         placeholder="Post title"
                         value={title}
-                        onChange={e => setTitle(e.target.value)}
+                        onChange={(e) => setTitle(e.target.value)}
                     />
                     <textarea
                         className="w-full border p-2 rounded mb-2"
-                        placeholder="What’s happening on campus?"
+                        placeholder="What's happening on campus?"
                         value={description}
-                        onChange={e => setDescription(e.target.value)}
+                        onChange={(e) => setDescription(e.target.value)}
                     />
                     <button
                         onClick={createPost}
-                        className="bg-primary text-white px-4 py-2 rounded"
+                        className="bg-primary text-white px-4 py-2 rounded hover:opacity-90"
                     >
                         Post
                     </button>
                 </div>
 
-                {posts.map(post => (
+                {/* Feed */}
+                {loading && <p>Loading feed…</p>}
+
+                {posts.map((post) => (
                     <div
                         key={post.id}
-                        className="bg-card p-4 rounded-xl shadow mb-4"
+                        className="bg-card shadow-soft rounded-xl p-4 mb-4"
                     >
-                        <h3 className="font-semibold">{post.title}</h3>
+                        <h3 className="font-semibold text-lg">{post.title}</h3>
                         <p className="text-muted mt-1">{post.description}</p>
                     </div>
                 ))}

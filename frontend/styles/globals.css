@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 body {
-    background-color: #F8FAFC;
+    background-color: #c7d1db;
+    font-family: Inter, sans-serif;
+}
+.bg-card {
+    background: white;
 }

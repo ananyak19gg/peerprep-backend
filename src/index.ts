@@ -1,14 +1,28 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import admin from "firebase-admin";
 import cron from "node-cron";
+
 import { recalculatePanicLevels } from "./panicRecalculator";
 import { sendDailyNotifications } from "./notifications";
+import { loungeTLDR } from "./routes/loungeTLDR";
 
 const app = express();
 
 /* =======================
-   CORS — FINAL & SAFE
+   FIREBASE INIT (SAFE)
+   ======================= */
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+  });
+}
+
+const db = admin.firestore();
+
+/* =======================
+   MIDDLEWARE
    ======================= */
 app.use(
   cors({
@@ -21,18 +35,6 @@ app.use(
 );
 
 app.use(express.json());
-
-if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(
-    process.env.FIREBASE_SERVICE_ACCOUNT as string
-  );
-
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
-
-const db = admin.firestore();
 
 /* =======================
    CRON JOBS
@@ -53,7 +55,7 @@ app.post("/api/posts", async (req, res) => {
     if (!communityId || !title || !description) {
       return res.status(400).json({
         success: false,
-        error: "Missing fields",
+        error: "Missing required fields",
       });
     }
 
@@ -67,13 +69,16 @@ app.post("/api/posts", async (req, res) => {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-    res.json({
+    return res.status(201).json({
       success: true,
       postId: postRef.id,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+  } catch (error) {
+    console.error("❌ Error creating post:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    });
   }
 });
 
@@ -82,7 +87,10 @@ app.get("/api/posts", async (req, res) => {
     const { communityId } = req.query;
 
     if (!communityId) {
-      return res.status(400).json({ success: false });
+      return res.status(400).json({
+        success: false,
+        error: "communityId is required",
+      });
     }
 
     const snapshot = await db
@@ -97,10 +105,10 @@ app.get("/api/posts", async (req, res) => {
       ...doc.data(),
     }));
 
-    res.json({ success: true, posts });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    return res.json({ success: true, posts });
+  } catch (error) {
+    console.error("❌ Error fetching posts:", error);
+    return res.status(500).json({ success: false });
   }
 });
 
@@ -112,7 +120,10 @@ app.post("/api/lounge/message", async (req, res) => {
     const { text } = req.body;
 
     if (!text) {
-      return res.status(400).json({ success: false });
+      return res.status(400).json({
+        success: false,
+        error: "Message text required",
+      });
     }
 
     await db.collection("globalLounge").add({
@@ -120,10 +131,10 @@ app.post("/api/lounge/message", async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    return res.status(201).json({ success: true });
+  } catch (error) {
+    console.error("❌ Lounge error:", error);
+    return res.status(500).json({ success: false });
   }
 });
 
@@ -140,12 +151,17 @@ app.get("/api/lounge/messages", async (_req, res) => {
       ...doc.data(),
     }));
 
-    res.json({ success: true, messages });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false });
+    return res.json({ success: true, messages });
+  } catch (error) {
+    console.error("❌ Lounge fetch error:", error);
+    return res.status(500).json({ success: false });
   }
 });
+
+/* =======================
+   GEMINI TL;DR
+   ======================= */
+app.get("/api/lounge/tldr", loungeTLDR);
 
 /* =======================
    HEALTH CHECK
@@ -159,5 +175,5 @@ app.get("/", (_req, res) => {
    ======================= */
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`📡 Server running on ${PORT}`);
+  console.log(`📡 Server running on port ${PORT}`);
 });

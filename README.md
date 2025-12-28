@@ -89,6 +89,7 @@ Database
 <h2>👥 Team Members & Contributions</h2>
 
 <h3>Ananya Dubey (Backend Developer & AI Integrator)</h3>
+
 * Designed the complete backend architecture
 * Implemented all APIs for posts, tasks, notifications, and lounge features
 * Integrated Google Gemini AI for:
@@ -97,18 +98,21 @@ Database
 * Managed Firestore schema, cron jobs, and environment configuration
 
 <h3>Shreya Singh (Documentation & Authentication Lead)</h3>
+
 * Authored complete project documentation and system explanation
 * Implemented authentication flow using Firebase Auth
 * Defined access logic and user flow documentation
 * Ensured clarity and consistency for submission and evaluation
 
 <h3>Rishita Chouksey (Connectivity & Integration Lead)</h3>
+
 * Established frontend–backend connectivity
 * Integrated APIs with frontend components
 * Ensured smooth data flow across posts, lounge, and tasks
 * Led the overall pitch narrative and feature walkthrough
 
 <h3>Shreya Deolia (Frontend Developer & UI/UX Designer)</h3>
+
 * Designed the user interface and interaction flow
 * Implemented frontend layouts and components
 * Focused on clean, calm, and accessible UX
